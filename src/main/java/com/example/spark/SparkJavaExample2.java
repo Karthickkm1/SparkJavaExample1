@@ -39,24 +39,14 @@ public class SparkJavaExample2 {
                 .and(col("name").equalTo("Andy")))
                 .show();
 
-        inputDS.filter(new FilterFunction<Row>() {
-            @Override
-            public boolean call(Row row) throws Exception {
-                return row.getAs("age") == null;
-            }
-        }).show();
+        inputDS.filter((FilterFunction<Row>) row -> row.getAs("age") == null).show();
 
         System.out.println("UDF implementation.. ");
 
         inputDS.filter(new AgeFilter())
                 .show();
 
-        Dataset<String> mapStrDs = inputDS.map(new MapFunction<Row, String>() {
-            @Override
-            public String call(Row row) throws Exception {
-                return row.getString(1);
-            }
-        }, Encoders.STRING());
+        Dataset<String> mapStrDs = inputDS.map((MapFunction<Row, String>) row -> row.getString(1), Encoders.STRING());
 
         Encoder<Person> personEncoder = Encoders.bean(Person.class);
 
@@ -68,7 +58,7 @@ public class SparkJavaExample2 {
 
         System.out.println("UDF - RowToPersonMapFn - Filter - Map");
         inputDS.filter(new AgeFilter())
-                .map((MapFunction<Row, Person>) new RowToPersonMapFn(), personEncoder)
+                .map(new RowToPersonMapFn(), personEncoder)
                 .show();
 
         System.out.println("UDF - PersonToStringMapFn - Map");
